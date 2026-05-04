@@ -290,12 +290,30 @@
                     body: formData
                 });
                 
+                // Verificar si la respuesta es JSON o HTML
+                const contentType = response.headers.get('content-type');
+                
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Error en la conversión');
+                    let errorMessage = 'Error en la conversión';
+                    
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        errorMessage = errorData.error || errorMessage;
+                    } else {
+                        // Si recibimos HTML, intentar extraer mensaje de error o usar texto genérico
+                        const text = await response.text();
+                        console.error('Respuesta HTML:', text.substring(0, 500));
+                        errorMessage = 'Error del servidor. Revisa la consola para más detalles.';
+                    }
+                    throw new Error(errorMessage);
                 }
                 
                 const blob = await response.blob();
+                
+                // Verificar que sea un PDF válido
+                if (blob.type !== 'application/pdf' && blob.size === 0) {
+                    throw new Error('El archivo convertido está vacío o no es un PDF válido');
+                }
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
