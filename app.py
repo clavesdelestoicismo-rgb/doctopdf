@@ -120,7 +120,13 @@ def doc_to_pdf(input_path, output_path):
 @app.route('/convert', methods=['POST'])
 def convert():
     """Endpoint para convertir documentos"""
+    print(f"📥 Recibiendo solicitud POST - Método: {request.method}")
+    
+    if request.method != 'POST':
+        return jsonify({'error': 'Método no permitido. Use POST'}), 405
+    
     if 'document' not in request.files:
+        print("❌ No se encontró el archivo en la solicitud")
         return jsonify({'error': 'No se encontró ningún archivo'}), 400
     
     file = request.files['document']
@@ -137,6 +143,7 @@ def convert():
     
     try:
         # Crear archivos temporales
+        print(f"📄 Procesando archivo: {file.filename}")
         with tempfile.NamedTemporaryFile(suffix=file_ext, delete=False) as temp_input:
             file.save(temp_input.name)
             input_path = temp_input.name
@@ -147,7 +154,9 @@ def convert():
             output_path = temp_output.name
         
         # Convertir documento
+        print(f"🔄 Convirtiendo {input_path} a {output_path}")
         doc_to_pdf(input_path, output_path)
+        print(f"✅ Conversión exitosa")
         
         # Enviar archivo PDF
         return send_file(
@@ -158,6 +167,9 @@ def convert():
         )
     
     except Exception as e:
+        print(f"❌ Error en conversión: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
     
     finally:
