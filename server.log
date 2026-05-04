@@ -7,3 +7,4 @@ WARNING: This is a development server. Do not use it in a production deployment.
  * Running on http://127.0.0.1:5000
  * Running on http://21.0.8.119:5000
 Press CTRL+C to quit
+127.0.0.1 - - [04/May/2026 03:14:13] "POST /convert HTTP/1.1" 400 -
